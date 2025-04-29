@@ -1,0 +1,20 @@
+{
+  "name": "@tiny-adventure/source",
+  "version": "0.0.0",
+  "license": "MIT",
+  "scripts": {},
+  "private": true,
+  "dependencies": {
+    "@create-solana-game/preset-lumberjack": "1.0.10",
+    "@solana/wallet-adapter-base": "^0.9.26",
+    "@solana/wallet-adapter-react-ui": "^0.9.38",
+    "@solana/web3.js": "^1.98.2",
+    "next": "^15.3.1",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0"
+  },
+  "devDependencies": {
+    "@nx/workspace": "16.10.0",
+    "nx": "16.10.0"
+  }
+}
