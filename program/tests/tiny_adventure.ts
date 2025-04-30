@@ -1,85 +1,89 @@
-import * as anchor from "@coral-xyz/anchor";
-import { Program } from "@coral-xyz/anchor";
-import { TinyAdventure } from "../target/types/tiny_adventure";
+import * as anchor from "@project-serum/anchor"
+import { Program } from "@project-serum/anchor"
+import { TinyAdventure } from "../target/types/tiny_adventure"
+import { assert } from "chai"
 
-describe("tiny_adventure", () => {
-  const provider = anchor.AnchorProvider.env();
-  anchor.setProvider(provider);
-  const program = anchor.workspace.TinyAdventure as Program<TinyAdventure>;
-  const payer = provider.wallet as anchor.Wallet;
-  const gameDataSeed = "gameData";
+describe("tiny-adventure", () => {
+  // Configure the client to use the local cluster.
+  anchor.setProvider(anchor.AnchorProvider.env())
 
-  it("Init player and chop tree!", async () => {
-    console.log("Local address", payer.publicKey.toBase58());
+  const program = anchor.workspace.TinyAdventure as Program<TinyAdventure>
+  const wallet = anchor.workspace.TinyAdventure.provider.wallet
 
-    const balance = await anchor
-      .getProvider()
-      .connection.getBalance(payer.publicKey);
+  // PDA for the game data account
+  const [newGameDataAccount] = anchor.web3.PublicKey.findProgramAddressSync(
+    [Buffer.from("level1", "utf8")],
+    program.programId
+  )
 
-    if (balance < 1e8) {
-      const res = await anchor
-        .getProvider()
-        .connection.requestAirdrop(payer.publicKey, 1e9);
-      await anchor
-        .getProvider()
-        .connection.confirmTransaction(res, "confirmed");
-    }
+  it("Initialize", async () => {
+    // Initialize the game data account
+    const tx = await program.methods
+      .initialize()
+      .accounts({
+        newGameDataAccount: newGameDataAccount,
+        signer: wallet.publicKey,
+        systemProgram: anchor.web3.SystemProgram.programId,
+      })
+      .rpc()
 
-    const [playerPDA] = anchor.web3.PublicKey.findProgramAddressSync(
-      [Buffer.from("player"), payer.publicKey.toBuffer()],
-      program.programId
-    );
+    // Fetch the game data account
+    const gameDataAccount = await program.account.gameDataAccount.fetch(
+      newGameDataAccount
+    )
+    assert(gameDataAccount.playerPosition == 0)
 
-    console.log("Player PDA", playerPDA.toBase58());
+    console.log(
+      "Player position is:",
+      gameDataAccount.playerPosition.toString()
+    )
+  })
 
-    const [gameDataPDA] = anchor.web3.PublicKey.findProgramAddressSync(
-      [Buffer.from(gameDataSeed)],
-      program.programId
-    );
-
-    try {
-      let tx = await program.methods
-        .initPlayer(gameDataSeed)
-        .accountsStrict({
-          player: playerPDA,
-          signer: payer.publicKey,
-          gameData: gameDataPDA,
-          systemProgram: anchor.web3.SystemProgram.programId,
+  it("Run Right", async () => {
+    // Move right 3 times
+    for (let i = 0; i < 3; i++) {
+      const tx = await program.methods
+        .moveRight()
+        .accounts({
+          gameDataAccount: newGameDataAccount,
         })
-        .rpc({ skipPreflight: true });
-      console.log("Init transaction", tx);
-
-      await anchor.getProvider().connection.confirmTransaction(tx, "confirmed");
-      console.log("Confirmed", tx);
-    } catch (e) {
-      console.log("Player already exists: ", e);
+        .rpc()
     }
 
-    for (let i = 0; i < 11; i++) {
-      console.log(`Chop instruction ${i}`);
+    // Fetch the game data account
+    const gameDataAccount = await program.account.gameDataAccount.fetch(
+      newGameDataAccount
+    )
 
-      let tx = await program.methods
-        .chopTree(gameDataSeed, 0)
-        .accountsStrict({
-          player: playerPDA,
-          sessionToken: null,
-          signer: payer.publicKey,
-          gameData: gameDataPDA,
-          systemProgram: anchor.web3.SystemProgram.programId,
+    assert(gameDataAccount.playerPosition == 3)
+
+    console.log(
+      "Player position is:",
+      gameDataAccount.playerPosition.toString()
+    )
+  })
+
+  it("Run Left", async () => {
+    // Move left 3 times
+    for (let i = 0; i < 3; i++) {
+      const tx = await program.methods
+        .moveLeft()
+        .accounts({
+          gameDataAccount: newGameDataAccount,
         })
-        .rpc();
-      console.log("Chop instruction", tx);
-      await anchor.getProvider().connection.confirmTransaction(tx, "confirmed");
+        .rpc()
     }
 
-    const accountInfo = await anchor
-      .getProvider()
-      .connection.getAccountInfo(playerPDA, "confirmed");
+    // Fetch the game data account
+    const gameDataAccount = await program.account.gameDataAccount.fetch(
+      newGameDataAccount
+    )
 
-    const decoded = program.coder.accounts.decode(
-      "playerData",
-      accountInfo.data
-    );
-    console.log("Player account info", JSON.stringify(decoded));
-  });
-});
+    assert(gameDataAccount.playerPosition == 0)
+
+    console.log(
+      "Player position is:",
+      gameDataAccount.playerPosition.toString()
+    )
+  })
+})
