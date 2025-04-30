@@ -1,13 +1,13 @@
 [features]
 seeds = false
 [programs.localnet]
-tiny_adventure = "MkabCfyUD6rBTaYHpgKBBpBo5qzWA2pK2hrGGKMurJt"
+tiny_adventure = "FnMVJJZVBCDKdEt8ZFmWCKhsKTBULQDj4MDcJkjH4Aoe"
 
 [registry]
 url = "https://anchor.projectserum.com"
 
 [provider]
-cluster = "devnet"
+cluster = "localnet"
 wallet = "~/.config/solana/id.json"
 
 [scripts]

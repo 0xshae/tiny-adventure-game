@@ -7,7 +7,6 @@ import { WalletModalProvider } from "@solana/wallet-adapter-react-ui"
 import {
   PhantomWalletAdapter,
   SolflareWalletAdapter,
-  BackpackWalletAdapter,
 } from "@solana/wallet-adapter-wallets"
 import { clusterApiUrl } from "@solana/web3.js"
 import { FC, ReactNode, useMemo } from "react"
@@ -19,7 +18,6 @@ const WalletContextProvider: FC<{ children: ReactNode }> = ({ children }) => {
 
   const wallets = useMemo(
     () => [
-      new BackpackWalletAdapter(),
       new PhantomWalletAdapter(),
       new SolflareWalletAdapter(),
     ],

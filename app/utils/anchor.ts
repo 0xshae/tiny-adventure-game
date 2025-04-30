@@ -23,7 +23,7 @@ const provider = new AnchorProvider(connection, wallet, {})
 setProvider(provider)
 
 // Tiny Adventure program ID
-const programId = new PublicKey("2F2K73Sj1ygx4N9ptCegrxEDvGNLCndrsCdmUbcHej3c")
+const programId = new PublicKey("FnMVJJZVBCDKdEt8ZFmWCKhsKTBULQDj4MDcJkjH4Aoe")
 
 export const program = new Program(
   IDL as Idl,
