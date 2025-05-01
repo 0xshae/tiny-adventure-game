@@ -24,8 +24,8 @@ pub mod tiny_adventure {
         Ok(())
     }
 
-    pub fn move_right(ctx: Context<MoveRight>) -> Result<()>{
-    let game_data_account = &mut ctx.accounts.game_data_account;
+    pub fn move_right(ctx: Context<MoveRight>) -> Result<()> {
+        let game_data_account = &mut ctx.accounts.game_data_account;
         if game_data_account.player_position == 3 {
             msg!("You have reached the end! Super!");
         } else {
