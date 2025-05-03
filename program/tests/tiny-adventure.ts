@@ -1,8 +1,50 @@
-import * as anchor from "@project-serum/anchor"
-import { Program } from "@project-serum/anchor"
+import { Keypair, PublicKey, SystemProgram } from "@solana/web3.js";
+import * as anchor from "@coral-xyz/anchor"
+import { Program } from "@coral-xyz/anchor"
 import { TinyAdventure } from "../target/types/tiny_adventure"
 import { assert } from "chai"
 
+const IDL = require("../target/idl/.json");
+const tinyAddress = new PublicKey("FnMVJJZVBCDKdEt8ZFmWCKhsKTBULQDj4MDcJkjH4Aoe");
+
+describe('TinyAdventure', () => {
+  let context;
+  let provider =  anchor.setProvider(anchor.AnchorProvider.env());
+  let tinyProgram = anchor.workspace.TinyAdventure as Program<TinyAdventure>;
+
+  //create PDA for game data account
+  const [gameAddress] = PublicKey.findProgramAddressSync(
+    [Buffer.from("level1", "utf8")],
+    tinyAddress
+  );
+
+  it('Initialize', async () => {
+    await tinyProgram.methods.initialize()
+    .accounts({
+      newGameDataAccount : gameAddress,
+      signer: provider.wallet.PublicKey,
+      systemProgram : SystemProgram.programId, 
+    }). rpc();
+
+    // Fetch the game data account
+    const gameDataAccount = await tinyProgram.account.gameDataAccount.fetch(
+      gameAddress
+    )
+    assert(gameDataAccount.playerPosition == 0)
+
+    console.log(
+      "Player position is:",
+      gameDataAccount.playerPosition.toString()
+    )
+
+  })
+})
+
+
+
+
+
+/*
 describe("tiny-adventure", () => {
   // Configure the client to use the local cluster.
   anchor.setProvider(anchor.AnchorProvider.env())
@@ -87,3 +129,4 @@ describe("tiny-adventure", () => {
     )
   })
 })
+*/
