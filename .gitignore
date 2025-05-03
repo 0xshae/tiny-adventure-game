@@ -39,4 +39,4 @@ testem.log
 Thumbs.db
 
 #local deployment env
-/test-ledger
+/test-ledger/
